@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parental Control Kamera Keluarga</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        #videoContainer {
+            transition: all 0.3s ease;
+        }
+        .permission-modal {
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-indigo-700">👨‍👩‍👧‍👦 Parental Guardian</h1>
+            <p class="text-gray-600 mt-2">Monitoring kamera dengan persetujuan keluarga</p>
+        </header>
+
+        <!-- Consent Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Persetujuan Akses Kamera</h2>
+            <p class="text-gray-700 mb-4">
+                Untuk menggunakan fitur ini, Anda HARUS mendapatkan persetujuan dari pemilik perangkat terlebih dahulu.
+                Sistem ini akan meminta izin akses kamera melalui browser secara legal.
+            </p>
+            
+            <div class="flex items-center mb-4">
+                <input type="checkbox" id="consentCheckbox" class="mr-2">
+                <label for="consentCheckbox">Saya telah mendapatkan persetujuan dari pemilik perangkat</label>
+            </div>
+            
+            <div class="flex flex-wrap gap-4">
+                <button id="startCameraBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    Mulai Akses Kamera
+                </button>
+                <button id="stopCameraBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded" disabled>
+                    Berhenti
+                </button>
+            </div>
+        </div>
+
+        <!-- Video Feed -->
+        <div id="videoContainer" class="hidden bg-gray-800 rounded-lg overflow-hidden">
+            <video id="cameraFeed" autoplay playsinline class="w-full"></video>
+        </div>
+
+        <!-- Features Section -->
+        <div class="grid md:grid-cols-3 gap-6 mt-8">
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="font-semibold flex items-center">
+                    <span class="bg-blue-100 p-2 rounded-full mr-2">
+                        🔒
+                    </span>
+                    Keamanan Data
+                </h3>
+                <p class="text-gray-600 mt-2">
+                    Akses kamera hanya disimpan di perangkat Anda dan tidak dikirim ke server mana pun.
+                </p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="font-semibold flex items-center">
+                    <span class="bg-green-100 p-2 rounded-full mr-2">
+                        👪
+                    </span>
+                    Untuk Keluarga
+                </h3>
+                <p class="text-gray-600 mt-2">
+                    Dirancang khusus untuk pemantauan anak dengan izin dan dalam pengawasan orang tua.
+                </p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="font-semibold flex items-center">
+                    <span class="bg-yellow-100 p-2 rounded-full mr-2">
+                        ⚖️
+                    </span>
+                    Legal
+                </h3>
+                <p class="text-gray-600 mt-2">
+                    Mematuhi semua peraturan privasi dan hanya berfungsi dengan persetujuan eksplisit.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disclaimer Footer -->
+    <footer class="bg-gray-800 text-white text-center py-4 mt-12">
+        <p class="text-sm">
+            HARAP DIGUNAKAN DENGAN BERTANGGUNG JAWAB | Aplikasi ini hanya berfungsi saat diakses langsung dari perangkat target dengan persetujuan pemilik
+        </p>
+    </footer>
+
+    <script>
+        const startBtn = document.getElementById('startCameraBtn');
+        const stopBtn = document.getElementById('stopCameraBtn');
+        const consentCheckbox = document.getElementById('consentCheckbox');
+        const video = document.getElementById('cameraFeed');
+        const videoContainer = document.getElementById('videoContainer');
+        let stream = null;
+
+        consentCheckbox.addEventListener('change', function() {
+            startBtn.disabled = !this.checked;
+        });
+
+        startBtn.addEventListener('click', async () => {
+            // Shows permission dialog in browser (must be triggered by user interaction)
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: true, 
+                    audio: false 
+                });
+                
+                video.srcObject = stream;
+                videoContainer.classList.remove('hidden');
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                
+                // Show notification
+                alert('Akses kamera berhasil! Ingat:\n1. Harus ada persetujuan\n2. Hanya untuk keperluan pengawasan anak\n3. Tidak merekam tanpa izin');
+            } catch (err) {
+                alert('Gagal mengakses kamera: ' + err.message);
+                console.error("Camera access error:", err);
+            }
+        });
+
+        stopBtn.addEventListener('click', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+                videoContainer.classList.add('hidden');
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+            }
+        });
+
+        // Show educational tooltip
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.querySelector('.tooltip').classList.remove('hidden');
+            });
+            card.addEventListener('mouseleave', function() {
+                this.querySelector('.tooltip').classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
