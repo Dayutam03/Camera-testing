@@ -1,0 +1,26 @@
+name: Free VPS (Ubuntu)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360  # max 6 jam
+
+    steps:
+      - name: Start VPS
+        run: |
+          echo "✅ Memulai VPS Ubuntu..."
+          sudo apt update -y
+          sudo apt install -y wget curl git unzip
+
+          echo "🌐 Install docker..."
+          curl -fsSL https://get.docker.com -o get-docker.sh
+          sh get-docker.sh
+
+          echo "🚀 Menjalankan container background (Pterodactyl ready)..."
+          docker run -d --name ptero -p 80:80 -p 2022:22 ubuntu:20.04 sleep infinity
+
+          echo "💡 VPS berjalan! Sekarang jalankan manual ke dalam container:"
+          echo "docker exec -it ptero bash"
