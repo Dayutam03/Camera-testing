@@ -1,24 +1,18 @@
-name: Free VPS (Ubuntu 22.04)
+name: Free VPS
 
-on:
-  workflow_dispatch:
+on: workflow_dispatch
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 360   # max 6 jam
-
+    timeout-minutes: 360
     steps:
-      - name: Start Free VPS
+      - name: Setup VPS
         run: |
-          echo "🔥 Memulai VPS Ubuntu..."
-          sudo apt update -y
-          sudo apt install -y curl wget unzip git screen
-
-          echo "✅ VPS Siap Digunakan!"
-          echo "Kamu bisa jalankan command tambahan di sini."
-          echo "Misal install Docker:"
-          echo "curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh"
-
-          echo "🌐 Jalankan container dummy agar VPS tetap hidup..."
-          sleep 21600  # 6 jam
+          sudo apt update && sudo apt install -y openssh-server
+          sudo service ssh start
+          echo "root:12345" | sudo chpasswd
+          sudo sed -i 's/#Port 22/Port 22/' /etc/ssh/sshd_config
+          sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+          sudo service ssh restart
+          echo "VPS ready. Use ngrok or Cloudflare tunnel to access."
